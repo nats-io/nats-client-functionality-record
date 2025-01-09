@@ -32,7 +32,7 @@ Item: COUNTER#22802062 received 2025-01-09 18:05:07.93747413 +0000 UTC on Subjec
 Headers:
   Nats-Incr: +2
 
-{"val":100}
+{"val":"100"}
 $ nats pub counter.hits '' -J -H "Nats-Incr:+1"
 $ nats s get COUNTER --last-for counter.hits
 Item: COUNTER#22802063 received 2025-01-09 18:06:00 +0000 UTC on Subject counter.hits
@@ -40,7 +40,7 @@ Item: COUNTER#22802063 received 2025-01-09 18:06:00 +0000 UTC on Subject counter
 Headers:
   Nats-Incr: +1
 
-{"val":101}
+{"val":"101"}
 ```
 
 ## Design and Behavior
@@ -50,10 +50,12 @@ counters will effectively create a big combined counter holding totals contribut
 
 Handling published messages has the follow behavior and constraints:
 
- * The header holds values like `+1`, `-1`, `+1.23`, in other words any valid `float64`, if the value fails to parse 
+ * A message with the header set and a non nil body is rejected
+ * The header holds values like `+1`, `-1`, `+1.23`, in other words any valid `int64`, if the value fails to parse 
    the message is rejected with an error
  * When publishing a message to the subject the last value is loaded, the body is parsed, incremented and written 
    into the new message body. The headers are all preserved.
+ * If the addition will overflow a `int64` in either direction the message will be rejected with an error
  * When publishing a message and the previous message do not have a `Nats-Incr` header it means the key is not a 
    counter, an error is returned to the user and the message is rejected
  * When a message with the header is received over a Source, that has the configuration setting enabled, processing is 
@@ -68,7 +70,7 @@ The value in the body is stored in a struct with the following keys:
 
 ```go
 type CounterValue struct {
-	Value float64 `json:"val"`
+	Value string `json:"val"`
 }
 ```
 

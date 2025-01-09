@@ -48,7 +48,8 @@ Headers:
    into the new message body
  * When publishing a message and the previous message do not have a `Nats-Incr` header it means the key is not a 
    counter, an error is returned to the user and the message is rejected
- * When a message with the header is received over a Source processing is done as above
+ * When a message with the header is received over a Source, that has the configuration setting enabled, processing is 
+   done as above
  * When a message with the header is received over a Mirror the message is stored verbatim
  * When a message without the header is received and the previous message is a counter this will also be rejected, 
    though this could be very expensive on streams with many non counter messages being written to them
@@ -65,6 +66,8 @@ type StreamConfig struct {
 	AllowMsgCounter bool          `json:"allow_msg_counter"`
 }
 ```
+
+Setting this on a Mirror should cause an error.
 
 This feature can be turned off and on using Stream edits.
 

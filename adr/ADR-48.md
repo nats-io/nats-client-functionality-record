@@ -50,6 +50,8 @@ Headers:
    counter, an error is returned to the user and the message is rejected
  * When a message with the header is received over a Source processing is done as above
  * When a message with the header is received over a Mirror the message is stored verbatim
+ * When a message without the header is received and the previous message is a counter this will also be rejected, 
+   though this could be very expensive on streams with many non counter messages being written to them
 
 
 # Stream Configuration

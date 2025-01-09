@@ -51,7 +51,7 @@ counters will effectively create a big combined counter holding totals contribut
 Handling published messages has the follow behavior and constraints:
 
  * A message with the header set and a non nil body is rejected
- * The header holds values like `+1`, `-1`, `+1.23`, in other words any valid `int64`, if the value fails to parse 
+ * The header holds values like `+1`, `-1` and `-10`, in other words any valid `int64`, if the value fails to parse 
    the message is rejected with an error
  * When publishing a message to the subject the last value is loaded, the body is parsed, incremented and written 
    into the new message body. The headers are all preserved.

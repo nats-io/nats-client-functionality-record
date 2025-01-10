@@ -56,12 +56,12 @@ Handling published messages has the follow behavior and constraints:
 
  * The header holds values like `+1`, `-1` and `-10`, in other words any valid `int64`, if the value fails to parse 
    the message is rejected with an error. A value of `0` is valid.
- * When publishing a message to the subject the last value is loaded, the body is parsed, incremented and written 
+ * When publishing a message to the subject the last value is loaded by the server receiving the message (so the leader), the body is parsed, incremented and written 
    into the new message body. The headers are all preserved.
  * If the addition will overflow a `int64` in either direction the message will be rejected with an error
  * When publishing a message and the previous message do not have a `Nats-Incr` header it means the subject is not a 
    counter, an error is returned to the user and the message is rejected
- * When a message has a `Nats-Rollup` header in addition to a `Nats-Incr` the previous message is loaded, calculation is done and all the history is deleted with the rollup message holding the current total 
+ * When a message has a `Nats-Rollup`, `Nats-Expected-Last-Sequence` or `Nats-Expected-Subject-Last-Sequence`, `Nats-Expected-Stream` or `Nats-Expected-Last-Msg-Id` header in addition to a `Nats-Incr` header it should be rejected
  * When a message with the header is received over a Source, that has the configuration setting enabled, processing is 
    done as above otherwise the message is discarded
  * When a message with the header is published to a Stream without the option set the message is rejected with an error
@@ -90,7 +90,7 @@ In the case of sourced streams the various headers that sourcing adds will provi
 
 It's important that counters can be reset to zero, in a simple standalone counter this is easily done with a subject purge. In a topology where multiple regions contribute to a total a regional reset might require a negative value to be published equal to the current total.
 
-The preferred method for Reset should be a rollup, with subject purge being used only for entire counter deletes.
+The preferred method for Reset should be a negative value being published followed by a purge up to the message holding the negative value, with subject purge being used only for entire counter deletes.
 
 ## Source-based Replicated Counters
 
@@ -110,7 +110,7 @@ We might say the regions listen on subjects like `count.es.hits` and we use rewr
 
 In this scenario we lose the ability to access the `count.es.hits` value anywhere other than in the `es` location - not ideal. One could mirror from ES -> EU cluster and then Source in the EU cluster into an aggregate counter thus retaining the source and total.
 
-Replicated counters further complicates matter wrt counter resets. In a standalone counter one can just purge the subject to reset it. In the replicated case a purge will not replicate, a roll-up would replicate and destroy the entire counter everywhere so the only real option is to publish a negative value (perhaps with a roll-up).
+Replicated counters further complicates matter wrt counter resets. In a standalone counter one can just purge the subject to reset it. In the replicated case a purge will not replicate, a roll-up would replicate and destroy the entire counter everywhere so the only real option is to publish a negative value.
 
 ### Adding Sources
 

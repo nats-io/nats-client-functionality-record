@@ -62,6 +62,7 @@ This repository captures Architecture, Design Specifications and Feature Guidanc
 |[ADR-42](adr/ADR-42.md)|jetstream, server|Pull Consumer Priority Groups|
 |[ADR-43](adr/ADR-43.md)|jetstream, client, server|JetStream Per-Message TTL|
 |[ADR-44](adr/ADR-44.md)|jetstream, server|Versioning for JetStream Assets|
+|[ADR-48](adr/ADR-48.md)|jetstream|JetStream Distributed Counter CRDT|
 
 ## Kv
 
